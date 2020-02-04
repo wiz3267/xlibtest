@@ -1,0 +1,10 @@
+# depslib dependency file v1.0
+1580817526 source:/home/wiz/Projects_CPP/XWindowTest/main.cpp
+	<iostream>
+	<fstream>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<errno.h>
+	<X11/Xlib.h>
+
