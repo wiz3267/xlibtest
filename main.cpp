@@ -17,12 +17,13 @@ int screen;
 XEvent e;
 
 char font[2048];
+char textfile[700000];
 int key;
 int len=20;
 int step=50;
 GC gc;
 int maxx=1024;
-int maxy=700;
+int maxy=400;
 
 int r=0,g=0,b=0;
 
@@ -34,10 +35,10 @@ unsigned long _RGB(int r,int g, int b)
 
 struct SYMBOLSETTINGS
 {
-    int sizesymbol,
+    int x,y, sizesymbol,
     colorback,
     colorforeground;
-} symbol={6,_RGB(255,255,255),_RGB(255,0,0)};
+} symbol={0,0, 2,_RGB(255,255,255),_RGB(0,0,0)};
 
 
 int loadfont()
@@ -55,6 +56,23 @@ int loadfont()
     }
     else return 0;
 }
+
+int loadtext()
+{
+    ifstream ifl;
+    ifl.open("res//newz.txt",std::ios::binary | ifl.in);
+
+    if (ifl.is_open())
+    {
+        ifl.read(textfile,sizeof(textfile));
+        //ifl.get
+        ifl.close();
+        return 1;
+    }
+    else return 0;
+}
+
+
 
 
 
@@ -94,8 +112,29 @@ void drawsymbol(int xc, int yc, int sizesymbol, unsigned char n, int colorback, 
 
 void drawstring(int x, int y, char * str)
 {
+    int len=symbol.sizesymbol*8;
+    symbol.x=x;
+    symbol.y=y;
+
     for(int i=0; i<strlen(str); i++)
-        drawsymbol(x+i*symbol.sizesymbol*8, y, symbol.sizesymbol, str[i], symbol.colorback, symbol.colorforeground);
+    {
+        unsigned char sym=str[i];
+
+        if (sym>=32)
+        {
+            drawsymbol(symbol.x, symbol.y, symbol.sizesymbol, sym, symbol.colorback, symbol.colorforeground);\
+        }
+        symbol.x+=len;
+
+       if ( (symbol.x>(maxx-len-1)) || (sym==10))
+        {
+            symbol.x=0;
+            symbol.y+=len;
+
+            if (symbol.y> (maxy-len)) return;
+        }
+
+    }
 
 }
 
@@ -131,7 +170,7 @@ int main( void ) {
 
    screen = DefaultScreen( display );
 
-   int delta=250;
+   int delta=0;
    window = XCreateSimpleWindow( display, RootWindow( display, screen ),     // Создать окно
                             delta, delta, maxx-delta, maxy-delta, 1,
                                 _RGB(255,255,255), _RGB(0,0,255));
@@ -143,6 +182,7 @@ int main( void ) {
    gc=DefaultGC( display, screen );
 
    loadfont();
+   loadtext();
 
    while(1)
    {                      // Бесконечный цикл обработки событий
@@ -152,7 +192,7 @@ int main( void ) {
                            // Перерисовать окно
         draw();
         drawsymbol(50,50, 5, 'F', 0, _RGB(255,0,0));
-
+        drawstring(0,90,textfile);
       }
 
       key=e.xkey.keycode;
@@ -174,7 +214,7 @@ int main( void ) {
 
             printstr(0,120,buf);
 
-            drawstring(0,90,buf);
+            drawstring(0,90,textfile);
         }
 
 
