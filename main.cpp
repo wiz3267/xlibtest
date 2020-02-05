@@ -26,30 +26,77 @@ int maxy=700;
 
 int r=0,g=0,b=0;
 
-
-int loadfont()
-{
-    ifstream ifl;
-    ifl.open("res//font.dat");
-    if (ifl.is_open())
-    {
-        ifl.read(font,sizeof(font));
-        ifl.close();
-        return 1;
-    }
-    else return 0;
-}
-
 unsigned long _RGB(int r,int g, int b)
 {
     return b + (g<<8) + (r<<16);
 }
 
 
+struct SYMBOLSETTINGS
+{
+    int sizesymbol,
+    colorback,
+    colorforeground;
+} symbol={6,_RGB(255,255,255),_RGB(255,0,0)};
+
+
+int loadfont()
+{
+    ifstream ifl;
+    ifl.open("res//font.dat",std::ios::binary | ifl.in);
+    for(int i=0; i<sizeof(font); i++) font[i]=1+4+16+64;
+
+    if (ifl.is_open())
+    {
+        ifl.read(font,sizeof(font));
+        //ifl.get
+        ifl.close();
+        return 1;
+    }
+    else return 0;
+}
+
+
+
 void rect(int x, int y, int len, int hei, int color)
 {
     XSetForeground(display, gc, color);
     XFillRectangle( display, window, gc, x, y, len, hei );
+}
+
+
+void drawsymbol(int xc, int yc, int sizesymbol, unsigned char n, int colorback, int colorforeground)
+{
+    int j=n*8;
+    for(int y=0; y<8;y++)
+    {
+        unsigned char sym=font[j];
+        unsigned char mask=128;
+
+        for(int x=0; x<8;x++)
+        {
+            int c;
+            if(sym&mask)
+            {
+                c=colorforeground;
+            }
+            else c=colorback;
+
+            rect(xc+x*sizesymbol, yc+y*sizesymbol, sizesymbol, sizesymbol, c);
+
+            mask>>=1;
+
+        }
+
+        j++;
+    }
+}
+
+void drawstring(int x, int y, char * str)
+{
+    for(int i=0; i<strlen(str); i++)
+        drawsymbol(x+i*symbol.sizesymbol*8, y, symbol.sizesymbol, str[i], symbol.colorback, symbol.colorforeground);
+
 }
 
 void draw()
@@ -104,11 +151,13 @@ int main( void ) {
       {
                            // Перерисовать окно
         draw();
+        drawsymbol(50,50, 5, 'F', 0, _RGB(255,0,0));
+
       }
 
       key=e.xkey.keycode;
 
-      if( (e.type == KeyPress) && (key==9) )    break;  // При нажатии кнопки - выход
+      if( (e.type == KeyPress) && (key==36) )    break;  // При нажатии кнопки - выход
 
 
       if (key==46) // KEY_L
@@ -124,6 +173,8 @@ int main( void ) {
             f.getline(buf,255);
 
             printstr(0,120,buf);
+
+            drawstring(0,90,buf);
         }
 
 
@@ -142,7 +193,10 @@ int main( void ) {
             len--;
             g+=30;
             draw();
-      }
+
+
+    }
+
 
 
       char msg[64];// = "Key code=%i";
