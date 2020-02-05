@@ -16,6 +16,7 @@ int screen;
 
 XEvent e;
 
+char font[2048];
 int key;
 int len=20;
 int step=50;
@@ -24,6 +25,20 @@ int maxx=1024;
 int maxy=700;
 
 int r=0,g=0,b=0;
+
+
+int loadfont()
+{
+    ifstream ifl;
+    ifl.open("res//font.dat");
+    if (ifl.is_open())
+    {
+        ifl.read(font,sizeof(font));
+        ifl.close();
+        return 1;
+    }
+    else return 0;
+}
 
 unsigned long _RGB(int r,int g, int b)
 {
@@ -43,8 +58,8 @@ void draw()
     {
         for(int y=0; y<maxy; y+=step)
         {
-            //rect(x, y, len, len,_RGB(r,g,b) );
-            rect(x, y, len, len,_RGB(rand(),rand(),rand()) );
+            rect(x, y, len, len,_RGB(r,g,b) );
+            //rect(x, y, len, len,_RGB(rand(),rand(),rand()) );
         }
      }
 
@@ -79,6 +94,8 @@ int main( void ) {
    XMapWindow( display, window );
 
    gc=DefaultGC( display, screen );
+
+   loadfont();
 
    while(1)
    {                      // Бесконечный цикл обработки событий
