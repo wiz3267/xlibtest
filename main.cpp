@@ -17,13 +17,13 @@ int screen;
 XEvent e;
 
 char font[2048];
-char textfile[700000];
+char *textfile=NULL;
 int key;
 int len=20;
 int step=50;
 GC gc;
 int maxx=1024;
-int maxy=400;
+int maxy=700;
 
 int r=0,g=0,b=0;
 
@@ -64,7 +64,12 @@ int loadtext()
 
     if (ifl.is_open())
     {
-        ifl.read(textfile,sizeof(textfile));
+        ifl.seekg(0, std::ios::end);
+        int size=ifl.tellg();
+        ifl.seekg(0, std::ios::beg);
+        textfile=new char[size+1];
+
+        ifl.read(textfile,size);
         //ifl.get
         ifl.close();
         return 1;
@@ -197,7 +202,7 @@ int main( void ) {
 
       key=e.xkey.keycode;
 
-      if( (e.type == KeyPress) && (key==36) )    break;  // При нажатии кнопки - выход
+      if( (e.type == KeyPress) && (key==36 || key==9) )    break;  // При нажатии кнопки - выход
 
 
       if (key==46) // KEY_L
@@ -214,7 +219,8 @@ int main( void ) {
 
             printstr(0,120,buf);
 
-            drawstring(0,90,textfile);
+            //awstring(0,90,buf);
+            drawstring(0,0, textfile);
         }
 
 
@@ -233,8 +239,6 @@ int main( void ) {
             len--;
             g+=30;
             draw();
-
-
     }
 
 
