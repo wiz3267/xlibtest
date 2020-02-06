@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+
 #include <X11/Xlib.h>
+//#include <QAudioInput>
 
 using namespace std;
 
@@ -38,7 +40,7 @@ struct SYMBOLSETTINGS
     int x,y, sizesymbol,
     colorback,
     colorforeground;
-} symbol={0,0, 2,_RGB(255,255,255),_RGB(0,0,0)};
+} symbol={0,0, 3, _RGB(255,255,255),_RGB(0,0,0)};
 
 
 int loadfont()
@@ -76,10 +78,6 @@ int loadtext()
     }
     else return 0;
 }
-
-
-
-
 
 void rect(int x, int y, int len, int hei, int color)
 {
@@ -125,6 +123,11 @@ void drawstring(int x, int y, char * str)
     {
         unsigned char sym=str[i];
 
+        if (sym==32)
+        {
+            symbol.colorforeground=_RGB(rand(),rand(),rand());
+        }
+
         if (sym>=32)
         {
             drawsymbol(symbol.x, symbol.y, symbol.sizesymbol, sym, symbol.colorback, symbol.colorforeground);\
@@ -150,7 +153,6 @@ void draw()
         for(int y=0; y<maxy; y+=step)
         {
             rect(x, y, len, len,_RGB(r,g,b) );
-            //rect(x, y, len, len,_RGB(rand(),rand(),rand()) );
         }
      }
 
@@ -164,7 +166,8 @@ void printstr(int x, int y, char *str)
 }
 
 
-int main( void ) {
+int main( void )
+{
 
    if( ( display = XOpenDisplay( getenv("DISPLAY" ) ) ) == NULL ) {  // Соединиться с X сервером,
       printf( "Can't connect X server: %s\n", strerror( errno ) );
