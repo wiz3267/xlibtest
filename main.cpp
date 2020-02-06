@@ -8,6 +8,8 @@
 #include <X11/Xlib.h>
 //#include <QAudioInput>
 
+
+//test edit
 using namespace std;
 
 extern int errno;
