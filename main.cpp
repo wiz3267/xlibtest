@@ -8,12 +8,8 @@
 #include <X11/Xlib.h>
 //#include <QAudioInput>
 
-
-//test edit
 using namespace std;
 
-extern int errno;
-int Def=10;
 Display *display;
 Window window;
 int screen;
@@ -22,6 +18,7 @@ XEvent e;
 
 char font[2048];
 char *textfile=NULL;
+int startfile=0;
 int key;
 int len=20;
 int step=50;
@@ -39,10 +36,11 @@ unsigned long _RGB(int r,int g, int b)
 
 struct SYMBOLSETTINGS
 {
-    int x,y, sizesymbol,
+    int x,y, sizesymbol;
+    unsigned long
     colorback,
     colorforeground;
-} symbol={0,0, 3, _RGB(255,255,255),_RGB(0,0,0)};
+} symbol={0,0, 4, _RGB(255,255,255),_RGB(0,0,0)};
 
 
 int loadfont()
@@ -54,7 +52,6 @@ int loadfont()
     if (ifl.is_open())
     {
         ifl.read(font,sizeof(font));
-        //ifl.get
         ifl.close();
         return 1;
     }
@@ -74,7 +71,6 @@ int loadtext()
         textfile=new char[size+1];
 
         ifl.read(textfile,size);
-        //ifl.get
         ifl.close();
         return 1;
     }
@@ -127,12 +123,16 @@ void drawstring(int x, int y, char * str)
 
         if (sym==32)
         {
-            symbol.colorforeground=_RGB(rand(),rand(),rand());
+            //symbol.colorforeground=_RGB(rand(),rand(),rand());
         }
 
-        if (sym>=32)
+        //if (sym>=32)
         {
-            drawsymbol(symbol.x, symbol.y, symbol.sizesymbol, sym, symbol.colorback, symbol.colorforeground);\
+            int clr;
+            if (sym==13) clr=_RGB(0,255,0);
+            else if (sym==10) clr=_RGB(0,0,255);
+            else clr=symbol.colorforeground;
+            drawsymbol(symbol.x, symbol.y, symbol.sizesymbol, sym, symbol.colorback, clr);
         }
         symbol.x+=len;
 
@@ -159,6 +159,14 @@ void draw()
      }
 
 }
+
+void ReDraw()
+{
+    rect(0, 0, maxx, maxy,_RGB(255,255,255) );
+    drawstring(0,40, textfile+startfile);
+
+}
+
 
 void printstr(int x, int y, char *str)
 {
@@ -200,9 +208,7 @@ int main( void )
       if( e.type == Expose )
       {
                            // Перерисовать окно
-        draw();
-        drawsymbol(50,50, 5, 'F', 0, _RGB(255,0,0));
-        drawstring(0,90,textfile);
+        ReDraw();
       }
 
       key=e.xkey.keycode;
@@ -244,7 +250,47 @@ int main( void )
             len--;
             g+=30;
             draw();
-    }
+      }
+
+      //стрелка вниз
+      if (key==116)
+      {
+        do {
+        char k=textfile[startfile];
+
+        if ((k!=13)||(k!=10)) startfile++;
+        if (k==10) break;
+
+
+        } while(1);
+
+        ReDraw();
+
+      }
+
+      //стрелка вверх
+      if (key==111)
+      {
+        startfile-=2;
+        do {
+            if (startfile<0) { startfile=0; break;}
+
+            char k=textfile[startfile];
+            //if (k>=32)
+            startfile--;
+            if (k==10)
+            {
+                startfile+=2;
+                if (startfile<0) startfile=0;
+                break;
+            }
+
+        } while(1);
+
+        ReDraw();
+
+      }
+
 
 
 
