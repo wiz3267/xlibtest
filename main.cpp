@@ -36,11 +36,13 @@ unsigned long _RGB(int r,int g, int b)
 
 struct SYMBOLSETTINGS
 {
-    int x,y, sizesymbol;
+    int x,y,
+    sizesymbol;//размер
     unsigned long
-    colorback,
-    colorforeground;
-} symbol={0,0, 4, _RGB(255,255,255),_RGB(0,0,0)};
+    colorback, //цвет заднего фона
+    colorforeground;//цвет переднего фона
+} symbol={0,0, 2, _RGB(0,0,255),_RGB(255,255,255)};
+//symbol это структура содержащая информацию о печатание символа
 
 
 int loadfont()
@@ -162,7 +164,7 @@ void draw()
 
 void ReDraw()
 {
-    rect(0, 0, maxx, maxy,_RGB(255,255,255) );
+    rect(0, 0, maxx, maxy, symbol.colorback );
     drawstring(0,40, textfile+startfile);
 
 }
@@ -201,6 +203,16 @@ int main( void )
 
    loadfont();
    loadtext();
+
+   //int sec=GetTickCount();
+
+   time_t seconds = time(NULL);
+   tm* timeinfo = localtime(&seconds);
+   srand(seconds);
+
+   //int nomer=loadpicture("vandam.jpg");
+
+   startfile=rand()%695000;
 
    while(1)
    {                      // Бесконечный цикл обработки событий
@@ -252,7 +264,20 @@ int main( void )
             draw();
       }
 
-      //стрелка вниз
+      if(key==114)
+      {
+        if(symbol.sizesymbol<10) symbol.sizesymbol++;
+        ReDraw();
+      }
+
+      if(key==113)
+      {
+        if(symbol.sizesymbol>1) symbol.sizesymbol--;
+        ReDraw();
+      }
+
+
+      //стрелка
       if (key==116)
       {
         do {
@@ -268,7 +293,13 @@ int main( void )
 
       }
 
-      //стрелка вверх
+    if (key==65)
+    {
+        startfile=rand()%695000;
+        ReDraw();
+    }
+
+      //стрелка
       if (key==111)
       {
         startfile-=2;
